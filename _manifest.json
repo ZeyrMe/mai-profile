@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "id": "zeyr.mai-profile",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "麦设",
   "description": "静态人设档案与隐私留白",
   "author": {

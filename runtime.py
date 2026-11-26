@@ -44,14 +44,22 @@ def item_text(items: list[dict]) -> str:
 
 
 def inject(kwargs: dict, plugin_id: str, text: str, limit: int) -> dict:
-    if not text:
-        return {"action": "continue"}
+    if not text or limit <= 0:
+        return {"action": "continue", "modified_kwargs": kwargs}
     if "items" in kwargs:
         # Context Items v1, not OpenAI wire messages. Replace only our own transient item.
         if kwargs.get("item_schema_version", 1) != 1:
             return {"action": "continue"}
         identity = f"zeyr:{plugin_id}:context"
         items = [item for item in kwargs["items"] if item.get("meta", {}).get("item_id") != identity]
+        used = sum(
+            len(str(part.get("text", "")))
+            for item in items
+            if str(item.get("meta", {}).get("item_id", "")).startswith("zeyr:")
+            for part in item.get("parts", [])
+            if part.get("type") == "text"
+        )
+        limit = min(limit, max(0, 280 - used))
         items.append(
             {
                 "item_type": "UserMessageItem",

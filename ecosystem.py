@@ -220,7 +220,7 @@ class EcosystemMixin:
 
     async def in_scope(self, message=None, **kwargs):
         stream = str(kwargs.get("session_id") or kwargs.get("stream_id") or "")
-        chat = ChatIdentity.from_message(message, stream)
+        chat = ChatIdentity.from_message(message if message is not None else kwargs, stream)
         if chat.kind == "unknown" and chat.stream_id:
             chat = self.scope_gate.routes.get(chat.stream_id, chat)
         self.scope_gate.remember(chat, self.config.scope.max_tracked_streams)

@@ -1,11 +1,35 @@
 # Generated from config_models.py; instance config.toml stays local.
 show_advanced = false
 enabled = true
+mode = "structured"
+freeform_text = ""
+basic_fields = []
+routine_note = ""
+likes_and_dislikes = ""
+guarded_entries = []
+unset_policy = "档案中未设定此事实；顺着当前人设模糊带过、吐槽或反问，不要编造具体数字、学校或家庭硬事实。"
+private_policy = "这是明确隐私红线，拒绝或岔开，不提供真实内容。"
+withheld_policy = "心里有数但现在不想直接说，可以装傻或卖关子。"
+teaser_policy = "有点动摇但还嘴硬，最多透露允许的模糊线索。"
+revealed_policy = "可以勉强或不好意思地承认。"
+half_life_minutes = 30
+shy_increment = 0.25
+shy_jitter = 0.04
+resistance_low = 1.4
+resistance_medium = 1.0
+resistance_high = 0.6
+private_multiplier = 1.2
+relation_multiplier = 1.0
+teaser_threshold = 0.4
+reveal_threshold = 0.8
+followup_min_chars = 4
+max_clarity_entries = 512
+max_seen_messages = 1024
 entries = []
 trigger_rules = []
 privacy_boundary = "只公开配置为 public 的字段。"
 snapshot_template = "{key}：{value}"
-hint_chars = 55
+hint_chars = 80
 
 [scope]
 mode = "all"
