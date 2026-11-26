@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+  "id": "zeyr.mai-profile",
+  "version": "0.1.0",
+  "name": "麦设",
+  "description": "静态人设档案与隐私留白",
+  "author": {
+    "name": "zeyr",
+    "url": "https://github.com/zeyr"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/zeyr/mai-profile"
+  },
+  "host_application": {
+    "min_version": "1.4.8",
+    "max_version": "1.4.99"
+  },
+  "sdk": {
+    "min_version": "2.23.0",
+    "max_version": "2.23.99"
+  },
+  "dependencies": [],
+  "capabilities": [],
+  "i18n": {
+    "default_locale": "zh-CN"
+  },
+  "changelog": "CHANGELOG.md",
+  "plugin_type": "chat"
+}

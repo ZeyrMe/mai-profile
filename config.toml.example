@@ -1,0 +1,12 @@
+# Generated from config_models.py; instance config.toml stays local.
+show_advanced = false
+enabled = true
+entries = []
+privacy_boundary = "只公开配置为 public 的字段。"
+snapshot_template = "{key}：{value}"
+hint_chars = 55
+
+[plugin]
+config_version = "0.1.0"
+
+[trigger_words]
