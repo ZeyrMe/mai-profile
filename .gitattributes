@@ -1,0 +1,48 @@
+# Treat text files consistently across platforms.
+* text=auto eol=lf
+
+# Repository and editor metadata.
+.gitattributes text
+.editorconfig text
+.gitignore text
+
+# Python source and stubs.
+*.py  text diff=python
+*.pyi text diff=python
+
+# Configuration, manifests, and dependency metadata.
+*.toml text
+*.json text
+*.yaml text
+*.yml  text
+*.ini  text
+*.cfg  text
+*.lock text
+
+# Documentation and scripts.
+*.md      text
+*.rst     text
+*.txt     text
+*.example text
+*.sh      text
+*.bash    text
+*.zsh     text
+*.ps1     text
+
+# Windows scripts retain their native line ending when used.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# SVG remains diffable; binary assets do not.
+*.svg  text
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.gz   binary
+*.7z   binary
+*.whl  binary
