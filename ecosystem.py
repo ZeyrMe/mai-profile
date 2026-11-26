@@ -201,8 +201,11 @@ class EcosystemMixin:
         schema = super().build_config_schema(**kwargs)
         # SDK does not propagate depends_on from a model field into its section.
         # Use its supported collapsed flag instead of promising a hidden section.
-        if "scope" in schema.get("sections", {}):
-            schema["sections"]["scope"]["collapsed"] = True
+        for section_name, section in schema.get("sections", {}).items():
+            field = cls.config_model.model_fields.get(section_name)
+            extra = (field.json_schema_extra or {}) if field else {}
+            if section_name == "scope" or extra.get("depends_on") == "show_advanced":
+                section["collapsed"] = True
         return schema
 
     def normalize_plugin_config(self, config_data):
