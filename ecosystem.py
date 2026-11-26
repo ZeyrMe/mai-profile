@@ -55,16 +55,56 @@ class ScopeConfig(PluginConfigBase):
     __ui_icon__ = "filter"
     __ui_order__ = 90
     mode: Literal["all", "whitelist", "blacklist"] = Field(
-        default="all", description="全部、仅名单、排除名单"
+        default="all",
+        description="默认对全部聊天生效；可改成只对下面填的名单生效，或把名单里的人和群屏蔽掉。",
+        json_schema_extra={"label": "范围模式"},
     )
-    groups: list[str] = Field(default_factory=list, description="群对象或 @set:集合 / @tag:标签")
-    privates: list[str] = Field(default_factory=list, description="私聊对象或集合引用")
-    users: list[str] = Field(default_factory=list, description="跨群用户对象或标签引用")
-    exclude: list[str] = Field(default_factory=list, description="始终排除；优先于白名单和私聊开关")
-    allow_private: bool = Field(default=True, description="允许未明确点名的私聊；主动推送仍需显式目标")
-    reference_cache_seconds: float = Field(default=60, ge=0, le=3600, description="公共集合缓存秒数")
-    api_timeout_seconds: float = Field(default=0.4, gt=0, le=0.4, description="本轮公共集合发现及调用总超时")
-    max_tracked_streams: int = Field(default=256, ge=1, le=10000, description="内存会话身份缓存上限")
+    groups: list[str] = Field(
+        default_factory=list,
+        description="直接填 QQ 群号，也可以填群关系里配好的集合（如 @set:观察群）。",
+        json_schema_extra={"label": "群聊名单", "placeholder": "例如 123456 或 @set:观察群"},
+    )
+    privates: list[str] = Field(
+        default_factory=list,
+        description="直接填私聊对方的 QQ 号。",
+        json_schema_extra={"label": "私聊名单", "placeholder": "例如 987654"},
+    )
+    users: list[str] = Field(
+        default_factory=list,
+        description="跨群按人识别，直接填 QQ 号或关系标签（如 @tag:同行Bot）。",
+        json_schema_extra={"label": "用户名单", "placeholder": "例如 987654 或 @tag:同行Bot"},
+    )
+    exclude: list[str] = Field(
+        default_factory=list,
+        description="无论上面怎么选，这里填到的群或人都一律跳过。",
+        json_schema_extra={"label": "强制排除", "placeholder": "例如 123456 或 @tag:同行Bot"},
+    )
+    allow_private: bool = Field(
+        default=True,
+        description="关闭后，除了白名单里点名的人之外，私聊不会触发本插件。",
+        json_schema_extra={"label": "允许私聊"},
+    )
+    reference_cache_seconds: float = Field(
+        default=60,
+        ge=0,
+        le=3600,
+        description="公共集合缓存秒数",
+        json_schema_extra={"label": "集合缓存秒数", "hidden": True},
+    )
+    api_timeout_seconds: float = Field(
+        default=0.4,
+        gt=0,
+        le=0.4,
+        description="本轮公共集合发现及调用总超时",
+        json_schema_extra={"label": "调用超时秒数", "hidden": True},
+    )
+    max_tracked_streams: int = Field(
+        default=256,
+        ge=1,
+        le=10000,
+        description="内存会话身份缓存上限",
+        json_schema_extra={"label": "会话缓存上限", "hidden": True},
+    )
 
     @field_validator("groups", "privates", "users", "exclude")
     @classmethod
