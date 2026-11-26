@@ -58,3 +58,12 @@ def test_sdk_schema_keeps_first_use_form_small():
     basic = [name for name, field in fields.items() if not field.get("depends_on")]
     assert len(basic) <= 5
     assert fields["privacy_boundary"]["depends_on"] == "show_advanced"
+
+
+def test_legacy_trigger_config_roundtrips_before_sdk_default_merge():
+    plugin = make(trigger_words={"测试主题": ["测试词"]})
+    stored = plugin.get_plugin_config_data()
+    assert "trigger_words" not in stored
+    assert stored["trigger_rules"] == [{"topic": "测试主题", "words": ["测试词"]}]
+    plugin.set_plugin_config(stored)
+    assert plugin.config.trigger_words == {"测试主题": ["测试词"]}

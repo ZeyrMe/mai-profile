@@ -21,7 +21,10 @@
     "max_version": "2.23.99"
   },
   "dependencies": [],
-  "capabilities": [],
+  "capabilities": [
+    "api.get",
+    "api.call"
+  ],
   "i18n": {
     "default_locale": "zh-CN"
   },

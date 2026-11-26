@@ -2,11 +2,21 @@
 show_advanced = false
 enabled = true
 entries = []
+trigger_rules = []
 privacy_boundary = "只公开配置为 public 的字段。"
 snapshot_template = "{key}：{value}"
 hint_chars = 55
 
+[scope]
+mode = "all"
+groups = []
+privates = []
+users = []
+exclude = []
+allow_private = true
+reference_cache_seconds = 60
+api_timeout_seconds = 0.4
+max_tracked_streams = 256
+
 [plugin]
 config_version = "0.1.0"
-
-[trigger_words]
