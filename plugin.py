@@ -40,10 +40,19 @@ class Plugin(EcosystemMixin, MaiBotPlugin):
                 else "浓雾"
             )
             stages[stage] += 1
-            progress.append(f"{key[2]}：{stage} {value:.0%}")
+            progress.append(f"{key[2]}（{stage} {value:.0%}）")
+        public_count = sum(row.disclosure == "public" and row.visibility != "private" for row in entries)
+        guarded_count = sum(
+            row.disclosure in ("shy", "private") or row.visibility == "private" for row in entries
+        )
+        stage_summary = (
+            f"浓雾 {stages['浓雾']} 项、动摇中 {stages['动摇中']} 项、已松口 {stages['已松口']} 项"
+            if progress
+            else "暂无正在被追问的兜着项"
+        )
         return (
-            f"公开条目：{sum(row.disclosure == 'public' and row.visibility != 'private' for row in entries)}；作息摘要：{'已配置' if self.config.routine_note else '未配置'}\n松口状态：{stages}\n"
-            + "；".join(progress)
+            f"档案条目：公开 {public_count} 条，兜着/保密 {guarded_count} 条 · 作息偏好：{'已填写' if self.config.routine_note else '未填写'}\n"
+            f"兜着松口进度：{stage_summary}" + (f"（{'；'.join(progress[:6])}）" if progress else "")
         )
 
     async def get_config_widget_state(self):

@@ -51,38 +51,77 @@ class ChatIdentity:
 
 
 class ScopeConfig(PluginConfigBase):
+    """控制本插件对哪些群聊或私聊生效。默认全部生效，不需要改动；如果只想在特定群试用或屏蔽某些群/用户，改这里即可。"""
+
     __ui_label__ = "生效范围"
     __ui_icon__ = "filter"
     __ui_order__ = 90
     mode: Literal["all", "whitelist", "blacklist"] = Field(
         default="all",
-        description="默认对全部聊天生效；可改成只对下面填的名单生效，或把名单里的人和群屏蔽掉。",
-        json_schema_extra={"label": "范围模式"},
+        description="选择按全部、仅白名单，还是排除黑名单的方式生效。",
+        json_schema_extra={
+            "label": "范围模式",
+            "order": 1,
+            "enum_labels": {
+                "all": "all（全部生效，只跳过强制排除）",
+                "whitelist": "whitelist（只对下面填的名单生效）",
+                "blacklist": "blacklist（排除下面填的名单）",
+            },
+            "hint": "all：所有群聊默认生效，只跳过“强制排除”；whitelist：只有写进下方名单的群或人才会触发本插件；blacklist：除名单外全部生效。新手保持 all 即可。",
+        },
     )
     groups: list[str] = Field(
         default_factory=list,
-        description="直接填 QQ 群号，也可以填群关系里配好的集合（如 @set:观察群）。",
-        json_schema_extra={"label": "群聊名单", "placeholder": "例如 123456 或 @set:观察群"},
+        description="指定纳入或排除的 QQ 群，或复用群关系集合。",
+        json_schema_extra={
+            "label": "群聊名单",
+            "order": 2,
+            "placeholder": "填 QQ 群号纯数字（如 123456），或群关系里建好的集合（如 @set:观察群）",
+            "hint": "QQ 直接填群号数字即可，不需要写前缀；其他平台写 平台:group:群号。支持填 @set:集合名 一处复用。",
+            "example": ["123456", "@set:观察群"],
+        },
     )
     privates: list[str] = Field(
         default_factory=list,
-        description="直接填私聊对方的 QQ 号。",
-        json_schema_extra={"label": "私聊名单", "placeholder": "例如 987654"},
+        description="指定纳入或排除的私聊对象。",
+        json_schema_extra={
+            "label": "私聊名单",
+            "order": 3,
+            "placeholder": "直接填私聊对方的 QQ 号（如 987654）；其他平台写 平台:private:账号",
+            "hint": "只在点对点私聊窗口生效；如果关闭了“允许未点名私聊”，写在这里的账号依然能触发本插件。",
+            "example": ["987654"],
+        },
     )
     users: list[str] = Field(
         default_factory=list,
-        description="跨群按人识别，直接填 QQ 号或关系标签（如 @tag:同行Bot）。",
-        json_schema_extra={"label": "用户名单", "placeholder": "例如 987654 或 @tag:同行Bot"},
+        description="跨群按账号识别特定成员或标签。",
+        json_schema_extra={
+            "label": "用户名单",
+            "order": 4,
+            "placeholder": "填对方 QQ 号（如 987654），或群关系标签（如 @tag:同行Bot）",
+            "hint": "跟着人走：不管对方在哪个群还是私聊里发言都会匹配，常用来按 @tag:同行Bot 整体屏蔽或识别。",
+            "example": ["@tag:同行Bot"],
+        },
     )
     exclude: list[str] = Field(
         default_factory=list,
-        description="无论上面怎么选，这里填到的群或人都一律跳过。",
-        json_schema_extra={"label": "强制排除", "placeholder": "例如 123456 或 @tag:同行Bot"},
+        description="无论上面怎么配，命中这里就始终跳过。",
+        json_schema_extra={
+            "label": "强制排除",
+            "order": 5,
+            "placeholder": "QQ 群填 group:群号 或纯群号，跨群按人排除写 user:QQ号 或 @tag:标签",
+            "hint": "最高优先级屏蔽名单：哪怕范围模式是 all 或对方也在白名单里，写进这里依然一律跳过本插件功能。",
+            "example": ["group:111222333", "@tag:同行Bot"],
+        },
     )
     allow_private: bool = Field(
         default=True,
-        description="关闭后，除了白名单里点名的人之外，私聊不会触发本插件。",
-        json_schema_extra={"label": "允许私聊"},
+        description="是否允许未在上方点名的普通私聊使用本插件。",
+        json_schema_extra={
+            "label": "允许普通私聊",
+            "order": 6,
+            "hint": "关闭后，只有显式写进“私聊名单”或匹配“用户名单”的私聊才能触发本插件；主动早晚安和搬运见闻仍需要单独配置私聊目标。",
+        },
     )
     reference_cache_seconds: float = Field(
         default=60,
@@ -284,15 +323,17 @@ class EcosystemMixin:
 
     async def get_config_widget_state(self):
         scope = self.config.scope
+        mode_labels = {"all": "全部生效", "whitelist": "仅名单内生效", "blacklist": "排除名单"}
+        mode_text = mode_labels.get(scope.mode, scope.mode)
+        extra = self.console_text()
         text = (
-            f"插件：{'启用' if self.config.enabled else '停用'}\n"
-            f"范围：{scope.mode}；默认私聊：{'允许' if scope.allow_private else '关闭'}\n"
-            f"已识别会话：{len(self.scope_gate.routes)}；公共引用缓存：{len(self.scope_gate.cache)}\n"
-            + self.console_text()
+            f"运行状态：{'已启用' if self.config.enabled else '已停用'}\n"
+            f"生效范围：{mode_text}（普通私聊：{'允许' if scope.allow_private else '关闭'}，已识别 {len(self.scope_gate.routes)} 个会话，公共集合缓存 {len(self.scope_gate.cache)} 条）"
+            + (f"\n{extra}" if extra else "")
         )
         return {
             "ecosystem_status": ConfigWidgetState(text=text[:2000], tone="neutral"),
-            "refresh_scope": ConfigWidgetState(text="下次使用时重新解析公共集合"),
+            "refresh_scope": ConfigWidgetState(text="点击后将在下次消息或调度时重新向群关系拉取集合"),
         }
 
     async def on_config_widget_action(self, action_id):
