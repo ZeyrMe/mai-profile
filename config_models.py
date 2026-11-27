@@ -22,34 +22,34 @@ class ProfileEntry(PluginConfigBase):
     )
     disclosure: Literal["public", "private", "shy"] = Field(
         default="public",
-        description="public 正常可答；shy 会先兜着、被多问才松口；private 死守不说。",
+        description="public 直接可答；shy 追问后逐步公开；private 始终保密。",
         json_schema_extra={
-            "label": "口风松紧",
+            "label": "公开方式",
             "enum_labels": {
-                "public": "public（公开，问到可直说）",
-                "shy": "shy（先兜着，被缠着多问才松口）",
-                "private": "private（永久保密，代码层死守不传）",
+                "public": "public（公开）",
+                "shy": "shy（追问后公开）",
+                "private": "private（保密）",
             },
         },
     )
     resistance: Literal["low", "medium", "high"] = Field(
         default="medium",
-        description="仅对 shy 生效：被追问时有多嘴硬。",
+        description="仅对 shy 生效：被追问时公开的难易程度。",
         json_schema_extra={
-            "label": "嘴硬程度",
+            "label": "追问难度",
             "enum_labels": {
-                "low": "low（问两三句就容易心软松口）",
-                "medium": "medium（正常傲娇，会先挡几轮）",
-                "high": "high（极倔强，非打破砂锅不松口）",
+                "low": "low（容易松口）",
+                "medium": "medium（一般）",
+                "high": "high（较难松口）",
             },
         },
     )
     teaser: str = Field(
         default="",
-        description="被追问松动时，允许隐约透露的一句模糊线索（不写也不会漏原话）。",
+        description="追问到线索阶段时可透露的提示内容，留空不泄露原设定。",
         json_schema_extra={
-            "label": "模糊线索",
-            "placeholder": "快动摇时允许漏出的提示，如：南方一座很爱吃辣的城市（留空也不泄原话）",
+            "label": "提示线索",
+            "placeholder": "如：南方一座爱吃辣的城市（留空则不透露具体内容）",
         },
     )
     visibility: Literal["public", "private", "triggered"] = Field(
@@ -92,30 +92,30 @@ class Config(PluginConfigBase):
         json_schema_extra={
             "label": "显示高级设置",
             "order": 9,
-            "hint": "平常只需填上面的公开资料和兜着项；需要改防胡编话术、松口冷却是间、关键词触发时再打开。",
+            "hint": "日常只需填写基础设定和保密设定；需要修改回复引导、冷却时间或关键词触发时再展开。",
         },
     )
     plugin: PluginInfo = Field(default_factory=PluginInfo)
     enabled: bool = Field(
         default=True,
-        description="开启后，问到自身设定时有底账可查。",
+        description="开启后支持在对话中按需查询人设与保密控制。",
         json_schema_extra={
             "label": "启用麦设",
             "order": 1,
-            "hint": "关闭后不再向聊天注入任何档案提示，也不响应查询工具。",
+            "hint": "关闭后不再向聊天注入人设提示，也不响应查询工具。",
         },
     )
     mode: Literal["structured", "freeform"] = Field(
         default="structured",
-        description="选择结构化分栏填表，或用一整段自由正文。",
+        description="选择结构化分栏填表，或使用整段自由文本。",
         json_schema_extra={
             "label": "档案形式",
             "order": 2,
             "enum_labels": {
-                "structured": "structured（分栏填表，推荐，支持联动生活作息）",
-                "freeform": "freeform（纯大段文本正文）",
+                "structured": "structured（分栏填写，推荐，支持联动日常作息）",
+                "freeform": "freeform（纯文本正文）",
             },
-            "hint": "推荐选 structured：字段拆分清楚，麦的一天还能直接读取作息习惯；习惯写一整段设定可选 freeform（只放可公开背景，秘密仍建议放“兜着/保密项”）。",
+            "hint": "推荐选 structured，字段清晰且可联动 mai-day；习惯写整段设定可选 freeform，保密内容请放到“保密设定”中。",
         },
     )
     freeform_text: str = Field(
@@ -124,8 +124,8 @@ class Config(PluginConfigBase):
         json_schema_extra={
             "label": "人设正文",
             "order": 3,
-            "placeholder": "用几句自然的话写清公开背景、平时几点睡、喜欢和讨厌什么；不要把打死不说的内容写进这里。",
-            "hint": "仅 freeform 模式生效。这里的内容默认可被查到，想要“兜着不说”的事实请移步“兜着/保密项”。",
+            "placeholder": "写清楚公开背景、平时作息、喜欢和讨厌什么；不要把保密内容写进这里。",
+            "hint": "仅 freeform 模式生效。此处内容默认可查，保密条目请放到“保密设定”中。",
             "x-widget": "textarea",
             "depends_on": "mode",
             "depends_value": "freeform",
@@ -133,90 +133,90 @@ class Config(PluginConfigBase):
     )
     basic_fields: list[ProfileEntry] = Field(
         default_factory=list,
-        description="可直接聊到的基础档案，如昵称、年龄、所在地等。",
+        description="基础人物设定条目，如年龄、学校、城市等。",
         json_schema_extra={
-            "label": "基础档案",
+            "label": "基础设定",
             "order": 4,
-            "hint": "每条填「设定名称 + 设定内容」即可（示例：设定名称填“城市”，设定内容填“杭州”）；口风选 public 公开 / shy 先兜着 / private 死守不说，嘴硬程度和模糊线索仅 shy 生效。",
+            "hint": "每条填“设定名称 + 设定内容”，如城市、专业；公开方式可选 public（公开）/ shy（追问后公开）/ private（保密）。",
         },
     )
     routine_note: str = Field(
         default="",
-        description="写清平时的作息习惯，生活日程插件会自动来参考。",
+        description="平时的作息习惯，开启作息插件时会自动参考。",
         json_schema_extra={
             "label": "作息习惯",
             "order": 5,
-            "placeholder": "例如：平时一点前睡，上午没课喜欢赖床，午饭后容易犯困",
-            "hint": "只放日常作息规律；开启「麦的一天」时每天生成日程底稿会自动来读取这一句作为背景参考。",
+            "placeholder": "例如：平时一点前睡，上午没课会多睡一会",
+            "hint": "填写日常作息规律；与 mai-day 同时使用时，每日生成日程会自动读取此项作为参考。",
         },
     )
     likes_and_dislikes: str = Field(
         default="",
-        description="喜欢吃喝玩的东西与讨厌的雷区。",
+        description="喜欢的事物与讨厌的雷区。",
         json_schema_extra={
             "label": "喜好雷区",
             "order": 6,
-            "placeholder": "例如：爱喝冰美式和吃辣，讨厌香菜，不喜欢被当成工具机器人",
-            "hint": "用一两句话概括喜好和雷点；平时不占对话字数，被问到相关话题才查得到。",
+            "placeholder": "例如：喜欢冰美式和吃辣，不吃香菜",
+            "hint": "概括喜好与忌口；平时不占用上下文，聊到相关话题时才会读取。",
         },
     )
     guarded_entries: list[ProfileEntry] = Field(
         default_factory=list,
-        description="不想随便直接回答的设定：可以设为一直兜着，或者被追问多了才松口。",
+        description="不希望直接回答的设定，可设为始终保密或多次追问后公开。",
         json_schema_extra={
-            "label": "兜着/保密项",
+            "label": "保密设定",
             "order": 7,
-            "hint": "专门放“不想一问就抖出来”的秘密：mouth 选 shy（兜着，按浓雾→动摇透漏模糊线索→被缠着多问才松口）或 private（代码层死锁，永远不传给模型）；嘴硬程度填 low/medium/high。",
+            "hint": "公开方式选 shy（随追问进度逐步透露，可附带提示线索）或 private（始终不传给模型）；追问难度选 low / medium / high。",
         },
     )
     unset_policy: str = Field(
-        default="没记过这件事，按平时说话的习惯含糊带过或反问一句，别现场瞎编具体数字或经历。",
-        description="被问到档案里根本没写过的问题时怎么圆过去。",
+        default="没有记录过这件事，按平时说话的习惯自然带过或反问一句，不要编造具体数字或经历。",
+        description="被问到未填写过的细节时的回复引导。",
         json_schema_extra={
-            "label": "未设定兜底",
-            "hint": "避免模型碰到档案里没填的事就现场编出一套新设定（比如瞎编出生年份或老家）。",
+            "label": "未设定提示",
+            "hint": "避免模型在遇到未填写的设定时自行编造新背景。",
         },
     )
     private_policy: str = Field(
-        default="这事不想往外说，自然拒绝或者换个话题。",
-        description="对方触及永久保密项时的态度要求。",
+        default="这件事不想往外说，自然拒绝或者换个话题。",
+        description="触发永久保密项时的回复引导。",
         json_schema_extra={
-            "label": "保密引导",
-            "hint": "遇到 private 条目时，真实答案不会下发给模型，只会把这句要求给它。",
+            "label": "保密提示",
+            "hint": "遇到 private 条目时，真实内容不会传给模型，仅下发此引导语。",
         },
     )
     withheld_policy: str = Field(
-        default="心里其实有数，但眼下还不想直说，装傻、卖个关子或者先不告诉对方。",
-        description="兜着阶段刚被问到时的反应要求。",
+        default="心里清楚，但眼下还不想直说，可以先绕开或者卖个关子。",
+        description="shy 设定初次被问到时的回复引导。",
         json_schema_extra={
-            "label": "初问遮掩语",
-            "hint": "对方刚开始打听 shy 秘密（浓雾阶段）时，模型收到的行为提示。",
+            "label": "初次追问提示",
+            "hint": "未透露阶段被问及 shy 设定时下发给模型的行为提示。",
         },
     )
     teaser_policy: str = Field(
-        default="被追问得有点松动，但还想端着，最多隐约露一点边角，别直接抖出来。",
-        description="被连问几次快顶不住时的反应要求。",
+        default="被追问多次后有点松动，可以隐约透露一点线索，但先别直接说破。",
+        description="shy 设定到达线索阶段时的回复引导。",
         json_schema_extra={
-            "label": "动摇提示语",
-            "hint": "追问到半透明阶段时下发：若该条目填了“模糊线索”，模型只能按线索含糊透露。",
+            "label": "线索阶段提示",
+            "hint": "已给线索阶段下发：若条目填了“提示线索”，模型仅按线索提示。",
         },
     )
     revealed_policy: str = Field(
-        default="被缠着问了好几回，可以有点不好意思地顺口说出来。",
-        description="终于松口说出答案时的语气引导。",
+        default="被反复追问后可以顺着话头说出来。",
+        description="shy 设定最终松口时的语气引导。",
         json_schema_extra={
-            "label": "松口语气语",
-            "hint": "清晰度达标松口时与真实答案一起交给模型。",
+            "label": "公开阶段提示",
+            "hint": "追问进度达标后，与真实设定内容一并交给模型。",
         },
     )
     half_life_minutes: float = Field(
         default=30,
         gt=0,
         le=1440,
-        description="隔了多少分钟没人再追问后，被撬开的口风会慢慢恢复一半防备。",
+        description="无人继续追问后，追问进度减半所需的分钟数。",
         json_schema_extra={
-            "label": "松口冷却分钟",
-            "hint": "单位：分钟（默认 30）。只要群友停下不问，过一阵子小 Bot 又会重新把口风收紧。",
+            "label": "进度冷却分钟",
+            "hint": "单位：分钟（默认 30）。过一段时间没人追问后，已累积的进度会逐渐回落。",
         },
     )
     shy_increment: float = Field(
@@ -323,11 +323,11 @@ class Config(PluginConfigBase):
         },
     )
     privacy_boundary: str = Field(
-        default="只聊允许公开的设定，不想说的事顺着语气带过。",
-        description="附在设定提示后面的一句说话边界提醒。",
+        default="只聊可以说的设定，不想说的事顺着话头带过。",
+        description="附在设定提示后面的边界提醒。",
         json_schema_extra={
-            "label": "口风边界提醒",
-            "hint": "每次触发公开档案注入时都会跟在结尾，提醒模型守住留白分寸。",
+            "label": "回复边界提示",
+            "hint": "触发档案注入时附在结尾，提醒模型注意保密边界。",
         },
     )
     snapshot_template: str = Field(

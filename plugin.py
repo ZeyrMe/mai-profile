@@ -16,8 +16,8 @@ class Plugin(EcosystemMixin, MaiBotPlugin):
         ConfigWidget(
             id="reset_clarity",
             kind="action",
-            label="重置全部兜着进度",
-            confirmation="重置所有会话的松口进度？",
+            label="重置追问进度",
+            confirmation="重置所有会话的追问进度？",
         ),
     ]
 
@@ -28,16 +28,16 @@ class Plugin(EcosystemMixin, MaiBotPlugin):
 
     def console_text(self):
         entries = self.profile_entries()
-        stages = {"浓雾": 0, "动摇中": 0, "已松口": 0}
+        stages = {"未透露": 0, "已给线索": 0, "已公开": 0}
         progress = []
         for key in self.clarity.rows:
             value = self.clarity.value(key, self.config)
             stage = (
-                "已松口"
+                "已公开"
                 if value >= self.config.reveal_threshold
-                else "动摇中"
+                else "已给线索"
                 if value >= self.config.teaser_threshold
-                else "浓雾"
+                else "未透露"
             )
             stages[stage] += 1
             progress.append(f"{key[2]}（{stage} {value:.0%}）")
@@ -46,13 +46,13 @@ class Plugin(EcosystemMixin, MaiBotPlugin):
             row.disclosure in ("shy", "private") or row.visibility == "private" for row in entries
         )
         stage_summary = (
-            f"浓雾 {stages['浓雾']} 项、动摇中 {stages['动摇中']} 项、已松口 {stages['已松口']} 项"
+            f"未透露 {stages['未透露']} 项、已给线索 {stages['已给线索']} 项、已公开 {stages['已公开']} 项"
             if progress
-            else "暂无正在被追问的兜着项"
+            else "暂无正在被追问的保密设定"
         )
         return (
-            f"档案条目：公开 {public_count} 条，兜着/保密 {guarded_count} 条 · 作息偏好：{'已填写' if self.config.routine_note else '未填写'}\n"
-            f"兜着松口进度：{stage_summary}" + (f"（{'；'.join(progress[:6])}）" if progress else "")
+            f"档案条目：公开 {public_count} 条，保密 {guarded_count} 条 · 作息偏好：{'已填写' if self.config.routine_note else '未填写'}\n"
+            f"追问进度：{stage_summary}" + (f"（{'；'.join(progress[:6])}）" if progress else "")
         )
 
     async def get_config_widget_state(self):
@@ -152,7 +152,7 @@ class Plugin(EcosystemMixin, MaiBotPlugin):
 
     @Tool(
         "query_self_profile",
-        description="查自己的公开人设档案与隐私留白；需要人物设定细节时使用。",
+        description="查询麦麦的人设资料、日常习惯与喜好。",
         parameters=[ToolParameterInfo(name="topic", description="要查询的话题", required=False, default="")],
         visibility="visible",
     )
