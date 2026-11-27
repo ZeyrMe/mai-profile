@@ -2,6 +2,13 @@
 
 一个更加灵活的麦麦人设扩展
 
+![Version](https://img.shields.io/badge/version-0.2.0-brightgreen)
+![MaiBot](https://img.shields.io/badge/MaiBot-1.4.8%2B-2f81f7)
+![SDK](https://img.shields.io/badge/SDK-2.23.0-0e8a16)
+![Python](https://img.shields.io/badge/Python-3.12%2B-3776ab)
+![Standalone](https://img.shields.io/badge/独立运行-支持-blue)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
 ## 功能介绍
 
 - **按需加载设定**：人设条目不会整段常驻上下文，只有在聊到相关关键词或模型调用工具核对时才会读取。
